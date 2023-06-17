@@ -43,7 +43,6 @@ export default function SignUp() {
     const handleSignUpClick = async () => {
         console.log("Sign Up Data ", signUpData);
         const response = await api.post("/signup", { signUpData });
-        console.log(response)
         if (response.ok) {
             handleSetSnackBarData(true, response.data.message, "success");
             setUser(response.data.user);

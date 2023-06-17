@@ -12,19 +12,44 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->validated();
-        if (!Auth::attempt($credentials)) {
+        $validator = Validator::make($request->all(), [
+            'loginData.email' => 'required|email',
+            'loginData.password' => 'required',
+        ]);
+
+        $validator->setCustomMessages([
+            'required' => 'The :attribute field is required.',
+            'email' => 'The :attribute field must be a valid email address.',
+        ]);
+
+        $validator->setAttributeNames([
+            'loginData.email' => 'Email',
+            'loginData.password' => 'Password',
+        ]);
+
+        if ($validator->fails()) {
+            throw new \InvalidArgumentException($validator->errors()->first());
+        }
+        try {
+            $credentials = $request->input('loginData');
+            if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+                return response()->json([
+                    'message' => 'Provided email or password incorrect ',
+                ], 500);
+            }
+            /** @var User $user */
+            $user = Auth::user();
+            $token = $user->createToken('main')->plainTextToken;
             return response()->json([
-                'error' => 'Provided email or password incorrect ',
+                'user' => $user,
+                'token' => $token,
+                'message' => 'Successfully Logged In',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred during login: ' . $e->getMessage(),
             ], 500);
         }
-        /** @var User $user */
-        $user = Auth::user();
-        $token = $user->createToken('main')->plainTextToken;
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ], 200);
     }
 
     public function signup(Request $request)
@@ -66,9 +91,9 @@ class AuthController extends Controller
             $userData = $signUpData;
 
             $user = User::create([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'password' => bcrypt($userData['password']),
+                'name' => $signUpData['name'],
+                'email' => $signUpData['email'],
+                'password' => bcrypt($signUpData['password']),
             ]);
 
             $token = $user->createToken('main')->plainTextToken;
@@ -80,7 +105,7 @@ class AuthController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'An error occurred during signup: ' . $e->getMessage(),
+                'message' => 'An error occurred during signup: ' . $e->getMessage(),
             ], 500);
         }
     }
