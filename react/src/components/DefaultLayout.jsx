@@ -47,8 +47,14 @@ export default function DefaultLayout() {
         }
     };
 
-    const handleCloseUserMenu = () => {
+    const handleCloseUserMenu = (setting) => {
         setAnchorElUser(null);
+        if (setting == "Dashboard") {
+            navigate("/dashboard");
+        } else if (setting == "Logout") {
+            localStorage.removeItem("ACCESS_TOKEN");
+            navigate("/login");
+        }
     };
 
     if (!token) {
@@ -206,12 +212,12 @@ export default function DefaultLayout() {
                                 horizontal: "right",
                             }}
                             open={Boolean(anchorElUser)}
-                            onClose={handleCloseUserMenu}
+                            onClick={(event) => handleCloseUserMenu("Close")}
                         >
                             {settings.map((setting) => (
                                 <MenuItem
                                     key={setting}
-                                    onClick={handleCloseUserMenu}
+                                    onClick={(event) => handleCloseUserMenu(setting)}
                                 >
                                     <Typography textAlign="center">
                                         {setting}
