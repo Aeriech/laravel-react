@@ -1,14 +1,16 @@
-import { createContext, useState,useContext } from "react";
+import { createContext, useState, useContext } from "react";
 
 const StateContext = createContext({
     currentUser: null,
     token: null,
     setUser: () => {},
-    handleSetToken: () => {}
+    handleSetToken: () => {},
 });
 
 export const ContextProvider = ({ children }) => {
-    const [user, setUser] = useState({name: "Aeriech"});
+    const [user, handleSetUser] = useState(
+        JSON.parse(localStorage.getItem("USER"))
+    );
     const [token, setToken] = useState(localStorage.getItem("ACCESS_TOKEN"));
 
     const handleSetToken = (token) => {
@@ -19,6 +21,14 @@ export const ContextProvider = ({ children }) => {
             localStorage.removeItem("ACCESS_TOKEN");
         }
     };
+
+    const setUser = (user) => {
+        handleSetUser(user);
+        if (user) {
+            localStorage.setItem("USER", JSON.stringify(user));
+        }
+    };
+
     return (
         <StateContext.Provider
             value={{
@@ -33,4 +43,4 @@ export const ContextProvider = ({ children }) => {
     );
 };
 
-export const useStateContext = () => useContext(StateContext)
+export const useStateContext = () => useContext(StateContext);

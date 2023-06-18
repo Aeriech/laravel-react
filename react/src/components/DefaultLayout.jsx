@@ -1,5 +1,5 @@
-import React, { Fragment, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import React, { Fragment, useEffect, useState } from "react";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useStateContext } from "./contexts/ContextProvider";
 import {
     Box,
@@ -12,19 +12,72 @@ import {
     Button,
     Tooltip,
     MenuItem,
-    Container,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import { NavBarDisplayName } from "../styles/CustomizedStyles";
 import { hiddenOnMobile } from "../styles/Styles";
+import api from "../configs/api";
+import SnackBar from "./reusableComponents/SnackBar";
+import DialogBox from "./reusableComponents/DialogBox";
+import EditProfile from "./fucntions/EditProfile";
 
 export default function DefaultLayout() {
-    const { user, token } = useStateContext();
+    const { user, token, setUser, handleSetToken } = useStateContext();
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const pages = ["Dashboard", "Users"];
     const settings = ["Profile", "Account", "Logout"];
+    const [dialogBoxData, setDialogBoxData] = useState([
+        {
+            open: false,
+            content: "",
+            size: "",
+        },
+    ]);
+    const [snackBarData, setSnackBarData] = useState([
+        {
+            open: false,
+            message: "",
+            severity: "",
+        },
+    ]);
+
+    const handleOpenDialogBox = () => {
+        setDialogBoxData((prevState) => ({
+            ...prevState,
+            open: true,
+            content: (
+                <EditProfile
+                    snackBarData={handleSetSnackBarData}
+                    onClose={handleCloseDialogBox}
+                />
+            ),
+            size: "xl",
+        }));
+    };
+
+    const handleCloseDialogBox = () => {
+        setDialogBoxData((prevState) => ({
+            ...prevState,
+            open: false,
+        }));
+    };
+
+    const handleSetSnackBarData = (open, message, severity) => {
+        setSnackBarData((prevState) => ({
+            ...prevState,
+            open: open,
+            message: message,
+            severity: severity,
+        }));
+        setTimeout(() => {
+            setSnackBarData((prevState) => ({
+                ...prevState,
+                open: false,
+            }));
+        }, 3000);
+    };
 
     const navigate = useNavigate();
 
@@ -40,7 +93,7 @@ export default function DefaultLayout() {
         if (page != "Close") {
             localStorage.setItem("TITLE", page);
         }
-        if (page == "Dashboard") {
+        if (page == "Profile") {
             navigate("/dashboard");
         } else if (page == "Users") {
             navigate("/users");
@@ -49,16 +102,18 @@ export default function DefaultLayout() {
 
     const handleCloseUserMenu = (setting) => {
         setAnchorElUser(null);
-        if (setting == "Dashboard") {
-            navigate("/dashboard");
+        if (setting == "Profile") {
+            handleOpenDialogBox();
         } else if (setting == "Logout") {
-            localStorage.removeItem("ACCESS_TOKEN");
-            navigate("/login");
+            api.post("/logout").then(() => {
+                setUser();
+                handleSetToken(null);
+            });
         }
     };
 
     if (!token) {
-        return navigate("/login");
+        return <Navigate to="/login" />;
     }
 
     return (
@@ -184,9 +239,9 @@ export default function DefaultLayout() {
 
                     <Box sx={NavBarDisplayName}>
                         <Typography marginRight={2} sx={hiddenOnMobile}>
-                            {" "}
-                            Hi, {user.name}{" "}
+                            Hi, {user?.name || ""}
                         </Typography>
+
                         <Tooltip title="Open settings">
                             <IconButton
                                 onClick={handleOpenUserMenu}
@@ -217,7 +272,9 @@ export default function DefaultLayout() {
                             {settings.map((setting) => (
                                 <MenuItem
                                     key={setting}
-                                    onClick={(event) => handleCloseUserMenu(setting)}
+                                    onClick={(event) =>
+                                        handleCloseUserMenu(setting)
+                                    }
                                 >
                                     <Typography textAlign="center">
                                         {setting}
@@ -228,8 +285,18 @@ export default function DefaultLayout() {
                     </Box>
                 </Toolbar>
             </AppBar>
-
             <Outlet />
+            <DialogBox
+                open={dialogBoxData.open}
+                onClose={handleCloseDialogBox}
+                content={dialogBoxData.content}
+                maxWidth={dialogBoxData.size}
+            />
+            <SnackBar
+                open={snackBarData.open}
+                message={snackBarData.message}
+                severity={snackBarData.severity}
+            />
         </Box>
     );
 }

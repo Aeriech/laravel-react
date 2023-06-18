@@ -40,6 +40,7 @@ class AuthController extends Controller
             /** @var User $user */
             $user = Auth::user();
             $token = $user->createToken('main')->plainTextToken;
+            $user->url = config('app.url');
             return response()->json([
                 'user' => $user,
                 'token' => $token,
@@ -57,7 +58,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'signUpData.name' => 'required|string',
             'signUpData.email' => 'required|email|unique:users,email',
-            'signUpData.password' => 'required|string|min:6|same:signUpData.confirmPassword',
+            'signUpData.password' => 'required|string|min:8|same:signUpData.confirmPassword',
         ]);
 
         $validator->setCustomMessages([
@@ -88,16 +89,15 @@ class AuthController extends Controller
                 throw new \Exception('Invalid signUpData');
             }
 
-            $userData = $signUpData;
-
             $user = User::create([
+                'image' => null,
                 'name' => $signUpData['name'],
                 'email' => $signUpData['email'],
                 'password' => bcrypt($signUpData['password']),
             ]);
 
             $token = $user->createToken('main')->plainTextToken;
-
+            $user->url = config('app.url');
             return response()->json([
                 'user' => $user,
                 'token' => $token,

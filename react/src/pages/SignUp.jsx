@@ -41,7 +41,6 @@ export default function SignUp() {
     };
 
     const handleSignUpClick = async () => {
-        console.log("Sign Up Data ", signUpData);
         const response = await api.post("/signup", { signUpData });
         if (response.ok) {
             handleSetSnackBarData(true, response.data.message, "success");
@@ -64,7 +63,7 @@ export default function SignUp() {
             <Box borderColor="black" border={1} padding={1} width="300px">
                 <Grid Grid container spacing={2} sx={centerContents}>
                     <Grid item xs={12} md={12}>
-                        <Typography variant="h4">Sign Up</Typography>
+                        <Typography variant="h4" fontWeight="bold">Sign Up</Typography>
                     </Grid>
                     <Grid item xs={12} md={12}>
                         <TextField
