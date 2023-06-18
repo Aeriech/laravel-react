@@ -26,7 +26,7 @@ export default function DefaultLayout() {
     const { user, token, setUser, handleSetToken } = useStateContext();
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
-    const pages = ["Dashboard", "Users"];
+    const pages = ["Rest Api Query"];
     const settings = ["Profile", "Account", "Logout"];
     const [dialogBoxData, setDialogBoxData] = useState([
         {
@@ -98,6 +98,9 @@ export default function DefaultLayout() {
         } else if (page == "Users") {
             navigate("/users");
         }
+        else if (page == "Rest Api Query") {
+            navigate("/rest-api-query");
+        }
     };
 
     const handleCloseUserMenu = (setting) => {
@@ -112,9 +115,9 @@ export default function DefaultLayout() {
         }
     };
 
-    if (!token) {
-        return <Navigate to="/login" />;
-    }
+    // if (!token) {
+    //     return <Navigate to="/login" />;
+    // }
 
     return (
         <Box>

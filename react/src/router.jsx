@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 import DefaultLayout from "./components/DefaultLayout";
 import GuestLayout from "./components/GuestLayout";
 import Dashboard from "./pages/Dashboard";
+import RestApiQuery from "./pages/RestApiQuery";
 
 const router = createBrowserRouter([
     {
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Navigate to="/dashboard" />,
+                element: <Navigate to="/rest-api-query" />,
             },
             {
                 path: "/dashboard",
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
             {
                 path: "/users",
                 element: <Users />,
+            },
+            {
+                path: "/rest-api-query",
+                element: <RestApiQuery />,
             },
         ],
     },
